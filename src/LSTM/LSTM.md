@@ -1,4 +1,5 @@
- 销售预测数据集
+# 数据集
+销售预测数据集
 Kaggle - Store Item Demand Forecasting
 描述：该数据集包含5年的每日销售数据，涵盖10家商店中的50种商品。数据集的目标是预测未来3个月的商品需求。数据集包括以下字段：日期、商店编号、商品编号和销售数量。
 适用场景：适用于时间序列分析和销售预测模型的构建，如ARIMA、LSTM等。
@@ -22,31 +23,51 @@ https://www.heywhale.com/mw/dataset/6617609e20e12fcbf32908a3
 # Introduction
 **长短期记忆网络（Long Short-Term Memory, LSTM）**是一种特殊的**循环神经网络（Recurrent Neural Network, RNN）**，主要用于*处理和预测时间序列数据中的长时间依赖关系*。
 # LSTM的结构
-LSTM的核心是记忆单元（Memory Cell），它能够存储信息，并通过三个门控机制来控制信息的流入、保留和流出：
-遗忘门（Forget Gate）：决定记忆单元中哪些信息需要保留或遗忘。
+LSTM的核心是**记忆单元（Memory Cell）**，它能够存储信息，并通过三个门控机制来控制信息的流入、保留和流出：Forget Gate, Input Gate,Output Gate .
+## 遗忘门（Forget Gate）
+Forget Gate决定记忆单元中哪些信息需要保留或遗忘。
 公式：
 $$
-f_t​=\sigma(W_f​⋅[ht−1​,xt​]+b_f​)
+f_t​=\sigma(W_f​⋅[h_{t−1}​,x_t​]+b_f​)
 $$
-其中，$\sigma$ 是**sigmoid函数**，$W_f$​ 是遗忘门的权重矩阵，$b_f​ 是偏置项，ht−1​ 是前一时刻的隐藏状态，xt​ 是当前时刻的输入。
-输入门（Input Gate）：控制哪些新信息可以写入记忆单元。
+其中，$\sigma$ 是**sigmoid函数**，$W_f$​ 是遗忘门的**权重矩阵**，$b_f$​ 是偏置项，$h_{t−1}$​ 是前一时刻的隐藏状态，$x_t$​是当前时刻的输入。
+## 输入门（Input Gate）
+Input Gate控制哪些新信息可以写入记忆单元。
 公式：
 $$
-I_t​=\sigma(Wi​⋅[ht−1​,xt​]+bi​)
+i_t​=\sigma(W_i​⋅[h_{t−1}​,x_t​]+b_i​)
 $$
-同时计算输入门候选值（Candidate Value）：C~t​=tanh(WC​⋅[ht−1​,xt​]+bC​)
-输出门（Output Gate）：决定记忆单元中哪些信息需要输出。
-公式：ot​=\sigma(Wo​⋅[ht−1​,xt​]+bo​)
+同时计算输入门候选值（Candidate Value）：
+$$
+c_t​=tanh(W_c​⋅[h_{t−1}​,x_t​]+b_c​)
+$$
+## 输出门（Output Gate）
+Output Gate决定记忆单元中哪些信息需要输出。$t$时刻的输出：
+$$
+o_t​=\sigma(W_o​⋅[h_{t−1}​,x_t​]+b_o​)
+$$
+
 # LSTM的工作原理
 整个LSTM的工作流程可以分为以下几个步骤：
-遗忘旧信息：遗忘门 ft​ 决定哪些记忆 Ct−1​ 需要保留或遗忘。
-更新记忆：Ct​=ft​⊙Ct−1​+I_t​⊙C~t​
+## 1. 遗忘旧信息
+Forget Gate $f_t$​ 决定哪些记忆 $c_{t−1}$​ 需要保留或遗忘。
+## 2.更新记忆：
+$$
+c_t​=f_t​⊙c_{t−1}​+i_t​⊙c_t​
+$$
 其中，⊙ 表示逐点乘法。
-写入新信息：输入门 I_t​ 决定哪些新信息 C~t​ 需要写入记忆单元。
-输出当前信息：输出门 ot​ 决定记忆单元 Ct​ 中哪些信息需要输出作为当前时刻的隐藏状态 ht​。
-计算隐藏状态：ht​=ot​⊙tanh(Ct​)
+
+## 3.写入新信息
+输入门 $i_t$​ 决定哪些新信息 $c_t$​ 需要写入记忆单元。
+## 4. 输出当前信息
+输出门 $o_t$​ 决定记忆单元 $c_t$​ 中哪些信息需要输出作为当前时刻的隐藏状态 $h_t$​。
+
+计算隐藏状态：
+$$
+h_t​=o_t​⊙tanh(C_t​)
+$$
 # LSTM的训练过程
-LSTM的训练过程主要通过误差反向传播（Backpropagation Through Time, BPTT）算法来优化网络参数，以最小化预测误差。
+LSTM的训练过程主要通过**误差反向传播（Backpropagation Through Time, BPTT）** 算法来优化网络参数，以最小化预测误差。
 在每次迭代中，计算预测值与真实值之间的误差，然后将误差反向传播到网络中，更新权重和偏置项，从而调整网络的参数。
 # LSTM的应用
 LSTM广泛应用于自然语言处理、语音识别、时间序列预测等任务中，例如：
@@ -85,4 +106,3 @@ class LSTM:
         h_t = o_t * tanh(C_t)
         return h_t, C_t
 ```
-通过以上笔记，你可以对LSTM的基本原理和应用有一个全面的了解，并可以根据需要进行进一步的学习和实践。
