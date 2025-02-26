@@ -80,8 +80,8 @@ def process_pdf(a):
             # 判断是否开始收集数据
             # print(line)
             # print(line == k1)
-            if line.contains(k1):
-                print('开始收集数据')
+            if k1 in line:
+                # print('开始收集数据')
                 collecting = True
 
             if collecting:
@@ -90,27 +90,46 @@ def process_pdf(a):
                     # 序号行作为记录的开头
                     current_record.insert(0, line)
                 else:
-                    print(line) # 测试用
-                    print("进入正则匹配")
+                    # print(line) # 测试用
+                    # print("进入正则匹配")
 
                     # 使用正则表达式匹配车型和时间
                     # match = re.match(r'\s*(\w+\s+\w+) (\d{4}-\d{2}-\d{2} \d{2}:\d{2})$', line)
-                    match = re.match(r'^\s*(\w+) (\d{4}-\d{2}-\d{2} \d{2}:\d{2})\s*$', line)
+                    match = re.match(r'^\s*(\w+\s*\w+) (\d{4}-\d{2}-\d{2} \d{2}:\d{2})\s*$', line)
                     if match:
-                        car_type = match.group(1)
+                        car_type = (match.group(1).strip().split())
+                        if len(car_type) == 1:
+                            current_record.append(car_type)
+                        elif len(car_type) == 2:
+                            current_record.append(car_type[0])
+                            current_record.append(car_type[1])
+                        else:
+                            print(f"脚本未考虑该情况:{car_type}")
+                        
                         departure_time = match.group(2)
-                        current_record.append(car_type)
+                        # print(match.group(1).strip())
+                        # print(f"车型:{car_type}, 时间:{departure_time}")
+                        
                         current_record.append(departure_time)
                     else:
-                        print(f"正则表达式未匹配的行: {line}")
+                        # print(f"正则表达式未匹配的行: {line}") # 测试用
                         current_record.append(line)
+                
 
                 # 检查是否完成一条记录
-                if len(current_record) == len(columns):
+                
+                # print(len(current_record))
+                # # print(len(columns))
+                # if (len(current_record) == 6) or (len(current_record) ==8):
+                #     print(current_record)
+
+                if len(current_record) >= len(columns):
                     # 处理金额字段，去除"元"字
-                    current_record[-1] = current_record[-1].replace("元", "")
-                    data.append(current_record)
-                    current_record = []
+                    current_record_tmp = current_record[:len(columns)]
+                    current_record_tmp[-1] = current_record_tmp[-1].replace("元", "")
+                    data.append(current_record_tmp)
+                    # 删除前 n 个元素
+                    del current_record[:len(columns)]
                     collecting = False
 
         # 3. k = k1 + date
@@ -133,7 +152,7 @@ def process_pdf(a):
             df[["日期", "时间"]] = df["上车时间"].str.extract(r"^(\d{4}-\d{2}-\d{2})\s(\d{2}:\d{2})$")
             total_amount = df["金额"].sum()
             df.to_excel(directory+"/"+k+f"总金额{total_amount}.xlsx")
-            print(f"已输出到路径: {directory}/{k}.xlsx")
+            print(f"已输出到路径: {directory}/{k}总金额{total_amount}.xlsx")
             
         else:
             print("未找到有效数据")
@@ -154,7 +173,8 @@ def process_pdf(a):
 # file_path = r"C:\Users\Thomas P Gao\Documents\personal\报销\hfy\新建文件夹 (5)\T3"
 # file_path = r"C:\Users\Thomas P Gao\Documents\personal\报销\hfy\新建文件夹 (5)\曹操5-8月"
 # file_path = r"C:\Users\Thomas P Gao\Documents\personal\报销\hfy\新建文件夹 (5)\5U"
-file_path = r"C:\Users\Thomas P Gao\Documents\personal\报销\hfy\新建文件夹 (5)\东潮"
+# file_path = r"C:\Users\Thomas P Gao\Documents\personal\报销\hfy\新建文件夹 (5)\东潮"
+file_path = r"C:\Users\Thomas P Gao\Documents\personal\报销\hfy\2024-05-13至2024-07-19"
 testlist =patch_read_filename(file_path)
 
 for pdffile in testlist:
